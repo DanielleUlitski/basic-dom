@@ -26,7 +26,7 @@ const createWalls = amount => {
     }
 }
 
-createWalls(47);
+createWalls(29);
 
 const wallArr = document.getElementsByClassName("wall");
 
@@ -37,7 +37,7 @@ const limits = {
     down: borderWalls.height - 40 - borderBlock.height
 }
 
-const border = dir => {
+const isValidMove = dir => {
     let compare;
 
     if (dir == "right" || dir == "left") {
@@ -54,52 +54,54 @@ const border = dir => {
     return true
 }
 
-const wallGenerator = () => {
-
+const randomNum = (min, max) => {
+    return Math.floor(Math.random() * max + min);
 }
 
+const wallGenerator = () => {
+    let wallBorders;
+    for(i in wallArr) {
+        wallBorders = wallArr[i].getBoundingClientRect();
+        if (randomNum(0, 1)) {
+            let j = randomNum(1, 4);
+            if(j == 1) {
+                limits["wall" + i] = wallBorders
+            }
+        }
+    }
+}
+
+wallGenerator();
 const isPassable = () => {
-    while(block.left < limits.right && block.top < limits.up) {
+    let i=0;
+    while(block.left < limits.right && block.top < limits.up && i < 400) {
         let runner = true;
 
-        
-        if (border("right")){
-            moveRight();
+        if(isValidMove("up") && !isValidMove("left") && !isValidMove("right")){
+            moveUp();
         }
-        else if (border("down")){
+        else if (isValidMove("right")){
             moveDown();
         }
-        else if (border("left")){
-            while(!border("down")) {
-                for(i = 0; i < 6; i++) {moveLeft();}
-                if(border("down")) {
-                    moveDown();
-                }
-            }
+        else if (isValidMove("left") && !isValidMove("down")){
+            moveLeft();
         }
-        else if(border("up")){
-            while(runner){
-                for(i = 0; i < 6; i++) {moveUp();}
-                if(border("right")) {
-                    moveRight();
-                    runner = false;
-                }
-                else if(border("left")) {
-                    moveLeft();
-                    runner = false;
-                }
-            }
+        else if (isValidMove("down")){
+            moveRight();
         }
         else {
             return false
         }
+    i++;
     }
     return true;
 }
 
+
+
 const moveUp = function() {
     if (!block.style.top) {block.style.top = "10px"}
-    if (!border("up")) {return}
+    if (!isValidMove("up")) {return}
     let top = parseInt(block.style.top);
     top -= 15;
     block.style.top = top + "px";
@@ -107,7 +109,7 @@ const moveUp = function() {
 
 const moveDown = function() {
     if (!block.style.top) {block.style.top = "10px"}
-    if (!border("down")) {return}
+    if (!isValidMove("down")) {return}
     let top = parseInt(block.style.top);
     top += 15;
     block.style.top = top + "px";
@@ -115,7 +117,7 @@ const moveDown = function() {
 
 const moveLeft = function() {
     if (!block.style.left) {block.style.left = "10px"}
-    if (!border("left")) {return}
+    if (!isValidMove("left")) {return}
     let left= parseInt(block.style.left);
     left -= 15;
     block.style.left = left + "px";
@@ -123,7 +125,7 @@ const moveLeft = function() {
 
 const moveRight = function() {
     if (!block.style.left) {block.style.left = "10px"}
-    if (!border("right")) {return}
+    if (!isValidMove("right")) {return}
     let left = parseInt(block.style.left);
     left += 15;
     block.style.left = left + "px";
@@ -131,3 +133,5 @@ const moveRight = function() {
 
 const maxPerHeight = Math.floor((borderWalls.height - 40 - borderBlock.height) / borderBlock.height);
 console.log(maxPerHeight);
+
+document.addEventListener("load", console.log(isPassable()));
