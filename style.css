@@ -30,11 +30,12 @@ body{
 
 #block{
     position: absolute;
-    width: 80px;
-    height: 80px;
+    width: 60px;
+    height: 60px;
     
     background-color: #27ae60;
     border-radius: 50%;
+    margin: 0px;
 }
 
 #arrows{
@@ -71,4 +72,18 @@ body{
 
 .arrow:active{
     background-color: #7f8c8d
+}
+
+.heads {
+    text-decoration: underline;
+    color: rgb(172, 10, 10);
+    font-family: Helvetica;
+    text-shadow: 3px 1px 2px black;
+}
+
+.wall {
+    width: 78px;
+    height: 78px;
+    float: left;
+    clear: none;
 }
