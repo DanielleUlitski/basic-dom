@@ -1,6 +1,4 @@
-console.log(document)
 const playingField = document.getElementById("playing-field");
-console.log(playingField);
 const down = document.getElementById("down");
 
 const header = document.createElement("h1");
@@ -14,16 +12,20 @@ subHeader.innerHTML = "Game by: ~The Creator~";
 subHeader.setAttribute("class", "heads");
 document.body.appendChild(subHeader);
 
-const block = document.getElementById("block");
-const borderWalls = document.getElementById("playing-field").getBoundingClientRect();
+const block = $("#block");
+const borderWalls = playingField.getBoundingClientRect();
 const borderBlock = document.getElementById("block").getBoundingClientRect();
+
 
 const createWalls = amount => {
     for(i=0; i <= amount; i++) {
         let newDiv = document.createElement("div");
         newDiv.setAttribute("class", "wall");
-        document.getElementById("playing-field").appendChild(newDiv);
+        newDiv.setAttribute("id", i);
+        newDiv.style.boxSizing = "border-box";
+        playingField.appendChild(newDiv);
     }
+    $("#0").append(block);
 }
 
 createWalls(29);
@@ -38,20 +40,27 @@ const limits = {
 }
 
 const isValidMove = dir => {
-    let compare;
-
-    if (dir == "right" || dir == "left") {
-        compare = parseInt(block.style.left);
+    if(!$("#block").parent()[0].style.borderTop && dir == "up") {
+        if(parseInt(block.parent().attr("id")) > 4) {
+            return true;
+        }
     }
-    
-    if (dir == "up" || dir == "down") {
-        compare = parseInt(block.style.top);
+    if(!$("#block").parent()[0].style.borderLeft && dir == "left") {
+        if (!parseInt(block.parent().attr("id")) % 5 == 0){
+            return true;
+        }
     }
-    
-    if(limits[dir] == compare) {
-        return false;
-    } 
-    return true
+    if (!(parseInt(block.parent().attr("id")) - 4) % 5 == 0) {
+        if(!$("#block").parent().next()[0].style.borderLeft && dir == "right") {
+            return true;
+        }
+    }
+    if(parseInt(block.parent().attr("id")) < 25) {
+        if(!$("#block").parent().next().next().next().next().next()[0].style.borderTop && dir == "down") {
+            return true;
+        }
+    }
+    return false;
 }
 
 const randomNum = (min, max) => {
@@ -59,79 +68,209 @@ const randomNum = (min, max) => {
 }
 
 const wallGenerator = () => {
-    let wallBorders;
-    for(i in wallArr) {
-        wallBorders = wallArr[i].getBoundingClientRect();
-        if (randomNum(0, 1)) {
-            let j = randomNum(1, 4);
-            if(j == 1) {
-                limits["wall" + i] = wallBorders
-            }
+    for(i = 0; i < wallArr.length; i++) {
+        let j = randomNum(1, 2);
+        switch(j) {
+            case(1):
+            wallArr[i].style.borderTop = "1px solid black";
+            break;
+            case(2):
+            wallArr[i].style.borderLeft = "1px solid black";
         }
     }
 }
 
-wallGenerator();
-const isPassable = () => {
-    let i=0;
-    while(block.left < limits.right && block.top < limits.up && i < 400) {
-        let runner = true;
+console.log(wallArr);
 
-        if(isValidMove("up") && !isValidMove("left") && !isValidMove("right")){
-            moveUp();
-        }
-        else if (isValidMove("right")){
-            moveDown();
-        }
-        else if (isValidMove("left") && !isValidMove("down")){
-            moveLeft();
-        }
-        else if (isValidMove("down")){
-            moveRight();
-        }
-        else {
-            return false
-        }
-    i++;
+const pseudoMoveUp = function() {
+    if(isValidMove("up")) {
+        block.parent().prev().prev().prev().prev().prev().append(block);
     }
+}
+
+const pseudoMoveDown = function() {
+    if(isValidMove("down")) {
+        block.parent().next().next().next().next().next().append(block);
+    }
+}
+
+const pseudoMoveLeft = function() {
+    if(isValidMove("left")) {
+        block.parent().prev().append(block);
+    }
+}
+
+const pseudoMoveRight = function() {
+    if (isValidMove("right")) {
+        block.parent().next().append(block);
+    }
+
+}
+
+const isPassable = () => {
+    let i = 0;
+    while (parseInt(block.parent().attr("id")) < 29 && i < 400) {
+        if(isValidMove("right")) {
+            pseudoMoveRight();
+        }
+        else if(isValidMove("down")) {
+            pseudoMoveDown();
+        }
+        else if(isValidMove("left")) {
+            let j = 0;
+            while(isValidMove("left") && !isValidMove("down") && !isValidMove("up") && j < 6) {
+                pseudoMoveLeft();
+                j++
+            }
+            if(isValidMove("down")) {
+                pseudoMoveDown();
+            }
+            else if(isValidMove("up")) {
+                pseudoMoveUp();
+            }
+            if (j == 6) {
+                $("#0").append(block);
+                return false;
+            }
+        }
+        else if(isValidMove("up")) {
+            let j = 0;
+            while(isValidMove("up") && !isValidMove("right") && !isValidMove("left") && j < 6) {
+                pseudoMoveUp();
+                j++;
+            }
+            if(isValidMove("right")) {
+                pseudoMoveRight();
+            }
+            else if(isValidMove("left")) {
+                pseudoMoveLeft();
+            }
+            if (j == 6) {
+                $("#0").append(block);
+                return false;
+            }
+        }
+        i++;
+    }
+    if(i == 400) {
+        $("#0").append(block);
+        i = 0;
+        while (parseInt(block.parent().attr("id")) < 29 && i < 400) {
+            if(isValidMove("down")) {
+                pseudoMoveDown();
+            }
+            else if(isValidMove("right")) {
+                pseudoMoveRight();
+            }
+            else if(isValidMove("left")) {
+                let j = 0;
+                while(isValidMove("left") && !isValidMove("down") && !isValidMove("up") && j < 6) {
+                    pseudoMoveLeft();
+                    j++
+                }
+                if(isValidMove("down")) {
+                    pseudoMoveDown();
+                }
+                else if(isValidMove("up")) {
+                    pseudoMoveUp();
+                }
+                if (j == 6) {
+                    $("#0").append(block);
+                    return false;
+                }
+            }
+            else if(isValidMove("up")) {
+                let j = 0;
+                while(isValidMove("up") && !isValidMove("right") && !isValidMove("left") && j < 6) {
+                    pseudoMoveUp();
+                    j++;
+                }
+                if(isValidMove("right")) {
+                    pseudoMoveRight();
+                }
+                else if(isValidMove("left")) {
+                    pseudoMoveLeft();
+                }
+                if (j == 6) {
+                    $("#0").append(block);
+                    return false;
+                }
+            }
+            i++;
+        }
+        
+        if (i==400){
+            $("#0").append(block);
+            return false;
+        }
+        $("#0").append(block);
+        return true;
+    }
+    $("#0").append(block);
     return true;
 }
 
+console.log(isPassable());
 
+const nullifyWalls = () => {
+    for(i = 0; i < 30; i++) {
+        $("#" + i).css("left", "");
+        $("#" + i).css("top", "");
+    }
+}
+
+const mazeConstruct = () => {
+    wallGenerator();
+    while (!isPassable()) {
+        nullifyWalls()
+        wallGenerator();
+    }
+}
 
 const moveUp = function() {
-    if (!block.style.top) {block.style.top = "10px"}
-    if (!isValidMove("up")) {return}
-    let top = parseInt(block.style.top);
-    top -= 15;
-    block.style.top = top + "px";
+    if(!block.css("top")) {block.css("top", "10px")}
+    if(isValidMove("up")) {
+        let up = parseInt(block.css("top"))
+        up -= parseInt(block.parent().css("height"));
+        block.css("top", up + "px");
+        block.parent().prev().prev().prev().prev().prev().append(block);
+    }
 }
 
 const moveDown = function() {
-    if (!block.style.top) {block.style.top = "10px"}
-    if (!isValidMove("down")) {return}
-    let top = parseInt(block.style.top);
-    top += 15;
-    block.style.top = top + "px";
+    if(!block.css("top")) {block.css("top", "10px")}
+    if(isValidMove("down")) {
+        let up = parseInt(block.css("top"));
+        up += parseInt(block.parent().css("height"));
+        block.css("top", up + "px")
+        block.parent().next().next().next().next().next().append(block);
+    }
+    if (parseInt(block.parent().attr("id")) == 29) {
+        $("#cong").css("display", "block");
+    }
 }
 
 const moveLeft = function() {
-    if (!block.style.left) {block.style.left = "10px"}
-    if (!isValidMove("left")) {return}
-    let left= parseInt(block.style.left);
-    left -= 15;
-    block.style.left = left + "px";
+    if (!block.css("left")) {block.css("left", "10px")}
+    if(isValidMove("left")) {
+        let left = parseInt(block.css("left"));
+        left -= parseInt(block.parent().css("width"));
+        block.css("left", left + "px");
+        block.parent().prev().append(block);
+    }
 }
 
 const moveRight = function() {
-    if (!block.style.left) {block.style.left = "10px"}
-    if (!isValidMove("right")) {return}
-    let left = parseInt(block.style.left);
-    left += 15;
-    block.style.left = left + "px";
+    if (!block.css("left")) {block.css("left" , "10px")}
+    if (isValidMove("right")) {
+        let left = parseInt(block.css("left"));
+        left += parseInt(block.parent().css("width"));
+        block.css("left", left + "px");
+        block.parent().next().append(block);
+    }
+    if (parseInt(block.parent().attr("id")) == 29) {
+        $("#cong").css("display", "block");
+    }
 }
 
-const maxPerHeight = Math.floor((borderWalls.height - 40 - borderBlock.height) / borderBlock.height);
-console.log(maxPerHeight);
-
-document.addEventListener("load", console.log(isPassable()));
+document.addEventListener("load", mazeConstruct());

@@ -82,9 +82,20 @@ body{
 }
 
 .wall {
-    width: 19%;
-    height: 15.7%;
+    width: 20%;
+    height: 16%;
     float: left;
     clear: none;
-    outline: 1px solid black
+}
+
+#results-cont {
+    float: bottom left;
+    height: 500px;
+    width: 300px;
+}
+
+#cong {
+    display: none;
+    font-size: 2em;
+    color: maroon;
 }
